@@ -1,3 +1,5 @@
+import re
+
 from typing import Annotated
 
 from typing_extensions import TypedDict
@@ -13,10 +15,9 @@ from langchain_openai import ChatOpenAI
 def get_transcript(url: str) -> str:
     """Get yourube video transcript"""
 
-    if url.find("youtube"):
-        url = url.replace("https://www.youtube.com/watch?v=", "")
+    video_id = re.search("v=(\w+)&", url)
 
-    transcript = YouTubeTranscriptApi.get_transcript(url)
+    transcript = YouTubeTranscriptApi.get_transcript(video_id.group(1))
     return transcript
 
 llm = ChatOpenAI(model="gpt-4o-mini")
@@ -34,7 +35,7 @@ prompt = PromptTemplate(
             * end time: END_TIME_IN_MINUTES
             * paragraph: TEXT
             where START_TIME_IN_MINUTES is the first time from the first sentence in which the field 'start' is converted to HH:MM:SS, 
-            END_TIME_IN_MINUTES is the last time from the last sentence in which the field 'start' converted to HH:MM:SS
+            END_TIME_IN_MINUTES is the last time from the last sentence in which the field 'start' is converted to HH:MM:SS
             TEXT is simply the text related to this paragraph without any aditions.
 
             Transcript: '{transcript}'""",
