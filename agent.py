@@ -21,8 +21,23 @@ def get_transcript(url: str) -> str:
 
 llm = ChatOpenAI(model="gpt-4o-mini")
 prompt = PromptTemplate(
-    template="""Show the transcript bellow 
-            '{transcript}'""",
+    template="""Below is the transcription from a youtube video. 
+            Your job is to
+            extract a paragraph (seguence of sentences) from this transcript that is self-contained and explains a specific subject. 
+            The paragraph should be roughly 500 words long. 
+            Do not change the text format. 
+            Do not explain to me why this paragraph was chosen. 
+            Think slowly about wether the paragraph is self-contained or not and if it is 500 words long.
+            If it doesn't fit these requirements, you can choose another paragraph that fits these requeriments better. 
+            Return the paragraph in the following format:
+            * start time: START_TIME_IN_MINUTES
+            * end time: END_TIME_IN_MINUTES
+            * paragraph: TEXT
+            where START_TIME_IN_MINUTES is the first time from the first sentence in which the field 'start' is converted to HH:MM:SS, 
+            END_TIME_IN_MINUTES is the last time from the last sentence in which the field 'start' converted to HH:MM:SS
+            TEXT is simply the text related to this paragraph without any aditions.
+
+            Transcript: '{transcript}'""",
     input_variables=["transcript"],
 )
 
