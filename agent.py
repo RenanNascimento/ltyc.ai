@@ -12,10 +12,13 @@ from youtube_transcript_api import YouTubeTranscriptApi
 
 from langchain_openai import ChatOpenAI
 
+from langsmith import traceable
+
 from dotenv import load_dotenv
 
 load_dotenv()
 
+@traceable(run_type="tool")
 def get_transcript(url: str) -> str:
     """Get yourube video transcript"""
 
