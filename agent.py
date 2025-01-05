@@ -6,7 +6,7 @@ from typing_extensions import TypedDict
 
 from langgraph.graph import StateGraph, START, END
 from langgraph.graph.message import add_messages
-from langchain_core.prompts import PromptTemplate
+from langchain_core.prompts import ChatPromptTemplate
 
 from youtube_transcript_api import YouTubeTranscriptApi
 
@@ -28,8 +28,8 @@ def get_transcript(url: str) -> str:
     return transcript
 
 llm = ChatOpenAI(model="gpt-4o-mini")
-prompt = PromptTemplate(
-    template="""Below is the transcription from a youtube video. 
+prompt = ChatPromptTemplate([
+    ("system", """Below is the transcription from a youtube video. 
             Your job is to
             extract a paragraph (seguence of sentences) from this transcript that is self-contained and explains a specific subject. 
             The paragraph should be roughly 500 words long. 
@@ -45,18 +45,19 @@ prompt = PromptTemplate(
             END_TIME_IN_MINUTES is the last time from the last sentence in which the field 'start' is converted to HH:MM:SS
             TEXT is simply the text related to this paragraph without any aditions.
 
-            Transcript: '{transcript}'""",
-    input_variables=["transcript"],
-)
+            Transcript: '{transcript}'"""),
+    ("user", "{user_message}"),
+])
 
 class State(TypedDict):
     messages: Annotated[list, add_messages]
 
 def chatbot(state: State):
-    transcript = get_transcript(state["messages"][-1].content)
+    user_message = state["messages"][-1].content
+    transcript = get_transcript(user_message)
 
     chatbot_runnable = prompt | llm
-    return {"messages": [chatbot_runnable.invoke(transcript)]}
+    return {"messages": [chatbot_runnable.invoke({"transcript": transcript, "user_message": user_message})]}
 
 graph_builder = StateGraph(State)
 
