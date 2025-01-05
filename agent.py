@@ -17,7 +17,7 @@ def get_transcript(url: str) -> str:
 
     video_id = re.search("v=(\w+)&", url)
 
-    transcript = YouTubeTranscriptApi.get_transcript(video_id.group(1))
+    transcript = YouTubeTranscriptApi.get_transcript(video_id.group(1), ["en", "fr"])
     return transcript
 
 llm = ChatOpenAI(model="gpt-4o-mini")
